@@ -18,11 +18,7 @@ const MEETUPS_DATA = [
 ];
 
 function HomePage() {
-  return (
-    <div>
-      <MeetupList meetups={MEETUPS_DATA} />
-    </div>
-  );
+  return <MeetupList meetups={MEETUPS_DATA} />;
 }
 
 export default HomePage;
