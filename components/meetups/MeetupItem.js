@@ -21,7 +21,7 @@ function MeetupItem(props) {
           <address>{props.address}</address>
         </div>
         <div className={classes.actions}>
-          <button>Show Details</button>
+          <button onClick={showDetailsHandler}>Show Details</button>
         </div>
       </Card>
     </li>
