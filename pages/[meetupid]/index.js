@@ -1,48 +1,59 @@
 import { Fragment } from "react";
+import { MongoClient, ObjectId } from "mongodb";
 
 import MeetupDetail from "../../components/meetups/MeetupDetail";
 
 function MeetupDetails(props) {
   return (
     <MeetupDetail
-      image="https://www.ebrdgreencities.com/assets/headers/bffc190ea7/yerevan-header.jpg"
-      title="First meetup"
-      address="Yerevan, Charentsi 7"
-      description="The first meetup"
+      image={props.meetupData.image}
+      title={props.meetupData.title}
+      address={props.meetupData.address}
+      description={props.meetupData.description}
     />
   );
 }
 
 export const getStaticPaths = async () => {
+  const client = await MongoClient.connect(process.env.MONGODB_URI);
+  const db = client.db();
+  const meetupCollection = db.collection("meetup");
+
+  const meetups = await meetupCollection.find({}, { _id: 1 }).toArray();
+
+  client.close();
+
   return {
     fallback: false,
-    paths: [
-      {
-        params: {
-          meetupid: "m1",
-        },
+    paths: meetups.map((meetup) => ({
+      params: {
+        meetupid: meetup._id.toString(),
       },
-      {
-        params: {
-          meetupid: "m2",
-        },
-      },
-    ],
+    })),
   };
 };
 
 export const getStaticProps = async (context) => {
   const meetupId = context.params.meetupid;
 
+  const client = await MongoClient.connect(process.env.MONGODB_URI);
+  const db = client.db();
+  const meetupCollection = db.collection("meetup");
+
+  const selectedMeetup = await meetupCollection.findOne({
+    _id: ObjectId(meetupId),
+  });
+
+  client.close();
+
   return {
     props: {
       meetupData: {
-        image:
-          "https://www.ebrdgreencities.com/assets/headers/bffc190ea7/yerevan-header.jpg",
-        id: meetupId,
-        title: "First meetup",
-        address: "Yerevan, Charentsi 7",
-        description: "The first meetup",
+        id: selectedMeetup._id.toString(),
+        image: selectedMeetup.image,
+        title: selectedMeetup.title,
+        address: selectedMeetup.address,
+        description: selectedMeetup.description,
       },
     },
     revalidate: 10,
